@@ -1,0 +1,16 @@
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+
+# Sensitive / local files
+*.pem
+*.key
+*.log
+
+# OS/editor
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
