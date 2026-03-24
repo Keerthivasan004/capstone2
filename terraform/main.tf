@@ -120,7 +120,7 @@ resource "aws_security_group" "capstone_sg" {
 
 resource "aws_instance" "jenkins" {
   ami                         = var.ami_id
-  instance_type               = var.instance_type
+  instance_type               = var.controller_instance_type
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.capstone_sg.id]
   key_name                    = var.key_name
@@ -134,7 +134,7 @@ resource "aws_instance" "jenkins" {
 
 resource "aws_instance" "k8s_worker1" {
   ami                         = var.ami_id
-  instance_type               = var.instance_type
+  instance_type               = var.worker_instance_type
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.capstone_sg.id]
   key_name                    = var.key_name
@@ -148,7 +148,7 @@ resource "aws_instance" "k8s_worker1" {
 
 resource "aws_instance" "k8s_master" {
   ami                         = var.ami_id
-  instance_type               = var.instance_type
+  instance_type               = var.worker_instance_type
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.capstone_sg.id]
   key_name                    = var.key_name
@@ -162,7 +162,7 @@ resource "aws_instance" "k8s_master" {
 
 resource "aws_instance" "k8s_worker2" {
   ami                         = var.ami_id
-  instance_type               = var.instance_type
+  instance_type               = var.worker_instance_type
   subnet_id                   = aws_subnet.public_subnet.id
   vpc_security_group_ids      = [aws_security_group.capstone_sg.id]
   key_name                    = var.key_name

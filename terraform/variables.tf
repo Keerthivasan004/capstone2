@@ -18,6 +18,10 @@ variable "ami_id" {
   type        = string
 }
 
-variable "instance_type" {
-  default = "t2.micro"
+variable "worker_instance_type" {
+  default = "t3.medium"
+}
+
+variable "controller_instance_type" {
+  default = "t3.medium"
 }
