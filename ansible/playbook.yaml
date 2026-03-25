@@ -1,0 +1,95 @@
+---
+- name: Jenkins + Docker Installation
+  hosts: jenkins
+  become: yes
+  tasks:
+    - name: Copy install_jenkins.sh
+      copy:
+        src: /home/ubuntu/capstone2/scripts/install_jenkins.sh
+        dest: /tmp/
+        mode: '0755'
+
+    - name: Run install_jenkins.sh
+      shell: bash /tmp/install_jenkins.sh
+
+    - name: Copy install_docker_jenkins.sh
+      copy:
+        src: /home/ubuntu/capstone2/scripts/install_docker_jenkins.sh
+        dest: /tmp/
+        mode: '0755'
+
+    - name: Run install_docker_jenkins.sh
+      shell: bash /tmp/install_docker_jenkins.sh
+
+- name: Kubernetes Prerequisites
+  hosts: k8s_master:k8s_workers
+  become: yes
+  tasks:
+    - name: Copy install_k8s_preq.sh
+      copy:
+        src: /home/ubuntu/capstone2/scripts/install_k8s_preq.sh
+        dest: /tmp/
+        mode: '0755'
+
+    - name: Run install_k8s_preq.sh
+      shell: bash /tmp/install_k8s_preq.sh
+
+- name: Install Docker + Kubernetes Packages
+  hosts: k8s_master:k8s_workers
+  become: yes
+  tasks:
+    - name: Copy install_docker_k8s.sh
+      copy:
+        src: /home/ubuntu/capstone2/scripts/install_docker_k8s.sh
+        dest: /tmp/
+        mode: '0755'
+
+    - name: Run install_docker_k8s.sh
+      shell: bash /tmp/install_docker_k8s.sh
+
+- name: Initialize Kubernetes Master
+  hosts: k8s_master
+  become: yes
+  tasks:
+    - name: Copy init_k8s-master.sh
+      copy:
+        src: /home/ubuntu/capstone2/scripts/init_k8s-master.sh
+        dest: /tmp/
+        mode: '0755'
+
+    - name: Run init_k8s-master.sh
+      shell: bash /tmp/init_k8s-master.sh
+      register: init_output
+
+    - name: Copy admin.conf to temporary location
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /tmp/kubeconfig
+        owner: ubuntu
+        mode: '0644'
+
+- name: Transfer kubeconfig to Jenkins
+  hosts: jenkins
+  become: yes
+  tasks:
+    - name: Fetch kubeconfig from master
+      fetch:
+        src: /tmp/kubeconfig
+        dest: /tmp/kubeconfig
+        flat: yes
+      delegate_to: "{{ groups['k8s_master'][0] }}"
+
+    - name: Place kubeconfig for Jenkins
+      copy:
+        src: /tmp/kubeconfig
+        dest: /var/lib/jenkins/kubeconfig
+        owner: jenkins
+        group: jenkins
+        mode: '0600'
+
+- name: Join Kubernetes Workers
+  hosts: k8s_workers
+  become: yes
+  tasks:
+    - name: Join workers using join command from master
+      shell: "{{ hostvars['k8s_master'].init_output.stdout_lines[-1] }}"
